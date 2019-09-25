@@ -1,15 +1,15 @@
-## Firewall Jubarte
+# Firewall Jubarte
 
 
-#Segurança da Informação:
+# Segurança da Informação
 
 Informação é algo que precisa ser protegido, independente de serem empresas ou serviços públicos e do porte desses responsáveis a perda de informações pode significar grandes riscos a seu futuro e até da segurança de usuários que dependem deles. A topologia de rede local das instituições pode sempre estar à mercê de ataques devido às suas vulnerabilidades, sendo assim é de grande importância que existam ações com o objetivo de proteger a informação. 
 
-#Ferramentas de Segurança...
+# Ferramentas de Segurança
 
 Existem protocolos e ferramentas de segurança de redes que visam proteger pontos específicos das topologias, grande parte delas são livres e gratuitas, mas dependem de conhecimento conciso de redes de computadores, além de serem segmentados, onde cada ferramenta tem funções específicas de detecção e/ou prevenção, além de ferramentas de redes de ação mais genérica que, entre outras, podem realizar funções de segurança. Sendo assim um sistema que garanta maior proteção para a rede local deve conter uma série de ferramentas que contemple as diversas camadas de operação, monitore o tráfego que entra e sai e também possa dá maneira mais automática possível agir contra prováveis ataques, tudo isso mantendo o maior número de registros possíveis (chamado no meio de log) para melhorias futuras. 
 
-#Um projeto de TCC
+# Um projeto de TCC
 
 A proposta de projeto para a matéria de Tópicos Especiais é levantar uma ambiente de Firewall operacional que rode as aplicações de segurança em Dockers, dando a ele modularidade de aplicações, persistência de execução das aplicações, isolamento de serviços e uma boa gestão das ferramentas como um todo.
 
@@ -17,7 +17,7 @@ Além do Docker propriamente dito será necessário uma maneira de realizar a ch
 
 	A príncipio o projeto funcionará em apenas um desktop normal
 
-#Para o futuro
+# Para o futuro
 
 Após a implementação ser realizada numa única máquina a ideia é ampliar para que o firewall funcione em máquinas diferentes, num cluster. E será utilizado raspberrys para diminuir os custos e gastos de consumo
 
@@ -29,8 +29,9 @@ O simbolo do docker é uma baleia carregando containers como se fosse um navio d
 A baleia jubarte (ou HUMPBACK WHALE) é conhecida por ter um comportamento altruísta ao defender outros animais de seu ecossistema de preadores
 
 Dessa maneira o nome escolhido foi o de FIREWALL JUBARTE
+	
 	Ou caso fique melhor em inglês HUMPBACK WHALE FIREWALL
-		(Vamos ver qual nome é mais maneiro ainda)....
+	(Vamos ver qual nome é mais maneiro...)
 
 
 Docker e baleias:
