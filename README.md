@@ -18,11 +18,11 @@ Além do Docker propriamente dito será necessário uma maneira de realizar a ch
 	A príncipio o projeto funcionará em apenas um desktop normal
 
 # Para o futuro
-Após a implementação ser realizada numa única máquina a ideia é ampliar para que o firewall funcione em máquinas diferentes, num cluster. E será utilizado raspberrys para diminuir os custos e gastos de consumo
+Após a implementação ser realizada numa única máquina a ideia é ampliar para que o firewall funcione em máquinas diferentes, num cluster. E serão utilizado raspberrys para diminuir os custos e gastos de consumo
 
 
 # Nome do projeto
-O simbolo do docker é uma baleia carregando containers como se fosse um navio de carga
+O simbolo do docker é uma baleia carregando containers como um navio de carga
 
 A baleia jubarte (ou HUMPBACK WHALE) é conhecida por ter um comportamento altruísta ao defender outros animais de seu ecossistema de preadores
 
