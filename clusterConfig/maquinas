@@ -2,3 +2,4 @@ Simulado com VMs com debian 10 stable
 Instalados sem interface gráfica, nem pacotes extras, apenas o ssh server
 Vou ver se o GIT aceita .OVFs
 Máquinas sem memória de swap
+PARA MÁQUINAS AMD64 É NECESSÁRIO TER NO MÍNIMO DOIS CORES DE PROCESSAMENTO
