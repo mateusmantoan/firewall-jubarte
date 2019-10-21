@@ -1,9 +1,6 @@
-#execute only on Master of cluster
-kubeadm init --apiserver-advertise-address $(hostname -i)
-#After this comand will me generate a command with
-#a token, use this cmd on all slaves
-mkdir -p $HOME/.kube
-cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
-chown $(id -u):$(id -g) $HOME/.kube/config
-kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=\
-$(kubectl version | base64 | tr -d '\n')"
+#start the cluster, execute this cmd on master
+
+docker swarm init --advertise-addr $(hostname -I | cut -d " " -f 1)
+
+#here will be generated the join token, this token need to be applied on all slave nodes
+#to see the token again use he cmd "docker swarm join-token"
