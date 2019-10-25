@@ -1,10 +1,17 @@
 #basic instalation for all nodes of cluster
 
+#script off official docker site
 DOCKER_SCRIPT=https://get.docker.com
 
-apt-get remove iptables
+#install packets
 apt-get update && apt-get install -y curl \
-apt-transport-https iproute2 iptables
+apt-transport-https \
+iproute2 \
+iptables-persistent \
+sshpass
 curl -fsSL $DOCKER_SCRIPT | bash
 apt clean
 
+#configure ssh for remote access
+echo "PermitRootLogin yes" >> /etc/ssh/sshd_config
+systemctl restart ssh
