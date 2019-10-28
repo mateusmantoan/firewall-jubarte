@@ -1,0 +1,64 @@
+#!/bin/bash
+
+clear
+
+
+
+function INICIO () {
+    echo  JUBARTE FIREWALL COMMAND LINE INTERFACE
+    echo
+    echo
+
+    echo Type 1 to manage hosts
+    echo Type 2 to manage iptaples rules
+    echo Type 3 to configure snort
+    echo Type 4 to configure squid
+    echo
+    echo Type 0 to close CLI
+    read option
+    
+    if [ $option = 1 ]
+    then
+        HOSTS
+    elif [ $option = 2 ]
+    then
+        HOSTS
+    elif [ $option = 3 ]
+    then
+        HOSTS
+    elif [ $option = 4 ]
+    then
+        HOSTS
+    elif [ $option = 0 ]
+    then
+        HOSTS    
+    else
+        echo invalid option, try again
+    fi
+}
+function HOSTS () {
+    clear
+    echo >> hostsfile
+    echo MANAGER HOSTS
+    echo Actual hosts:
+    cat hostsfile
+    echo Type 1 to include hosts
+    echo Type 2 to remove hosts
+    echo Type 0 to back
+    read option
+    if [ $option = 1 ]
+    then
+        HOSTS_ADICIONAR
+    elif [ $option = 2 ]
+    then
+        HOSTS_REMOVER
+    elif [ $option = 0 ]
+    then
+        INICIO    
+    else
+        echo invalid option, try again
+    fi
+}
+
+
+INICIO
