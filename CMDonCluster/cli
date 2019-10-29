@@ -127,17 +127,67 @@ function IPTABLES () {
         INICIO    
     else
         echo invalid option, try again
+        IPTABLES
     fi
 }
 
 function IPTABLES_ADDREGRAS () {
+    clear
     echo Type the rule to add on cluster
-    read $rule
+    echo Type 9 to back to iptables menu
+    read RULE
+    if [ $RULE = 9 ]
+    then
+        IPTABLES
+    else
     for server in $(cat hostsfile)
     do
-        ssh root@$server $rule
-    done
-    
+        ssh root@$server "$RULE"
+        done
+    echo rule included on cluster
+    sleep 1
+    fi
+    IPTABLES
+}
+
+function IPTABLES_RMREGRAS () {
+    clear
+    echo Type the rule to remove of cluster
+    echo Type 9 to back to iptables menu
+    read RULE
+    if [ $RULE = 9 ]
+    then
+        IPTABLES
+    else
+    for server in $(cat hostsfile)
+    do
+        ssh root@$server "$RULE"
+        done
+    echo rule removed of cluster
+    sleep 1
+    fi
+    IPTABLES
+}
+
+function IPTABLES_VERREGRAS () {
+    clear
+    iptables -L
+    echo
+    echo
+    echo Type ENTER to back to iptables menu
+    read RULE
+    IPTABLES
+}
+
+function IPTABLES_ZERARREGRAS () {
+    clear
+    iptables-restore < /etc/iptables-clean
+    echo 
+    echo IPtables rules restored
+    echo
+    echo Type ENTER to back to iptables menu
+    read RULE
+    IPTABLES
 }
     
 INICIO
