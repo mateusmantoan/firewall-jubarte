@@ -2,9 +2,8 @@
 
 clear
 
-
-
 function INICIO () {
+    clear
     echo  JUBARTE FIREWALL COMMAND LINE INTERFACE
     echo
     echo
@@ -13,6 +12,7 @@ function INICIO () {
     echo Type 2 to manage iptaples rules
     echo Type 3 to configure snort
     echo Type 4 to configure squid
+    echo Type 5 to use tcpdump and nmap
     echo
     echo Type 0 to close CLI
     read option
@@ -22,26 +22,28 @@ function INICIO () {
         HOSTS
     elif [ $option = 2 ]
     then
-        HOSTS
+        IPTABLES
     elif [ $option = 3 ]
     then
-        HOSTS
+        SNORT
     elif [ $option = 4 ]
     then
-        HOSTS
+        SQUID
     elif [ $option = 0 ]
     then
-        HOSTS    
+        clear
+        exit 0    
     else
         echo invalid option, try again
     fi
 }
+    
 function HOSTS () {
     clear
-    echo >> hostsfile
     echo MANAGER HOSTS
     echo Actual hosts:
     cat hostsfile
+    echo \#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#
     echo Type 1 to include hosts
     echo Type 2 to remove hosts
     echo Type 0 to back
@@ -60,5 +62,82 @@ function HOSTS () {
     fi
 }
 
+function HOSTS_ADICIONAR () {
+    echo Type the new IP
+    echo Type 9 to back to HOSTS MENU
+    read IP
+    ipvalido=$(echo $IP | egrep '^(([0-9]{1,2}|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.){3}([0-9]{1,2}|1[0-9][0-9]|2[0-4][0-9]|25[0-5])$')
+    if [ $IP = 9 ]
+    then
+        HOSTS
+    elif [ "$ipvalido" != "" ]
+        then
+        echo $IP >> hostsfile
+        echo IP included on cluster
+    else
+        echo Invalid IP, verify again
+        echo 
+        HOSTS_ADICIONAR
+    fi    
+}
 
+function HOSTS_REMOVER () {
+    echo Type the IP will be removed
+    echo Type 9 to back to HOSTS MENU
+    read IP
+    ipvalido=$(echo $IP | egrep '^(([0-9]{1,2}|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.){3}([0-9]{1,2}|1[0-9][0-9]|2[0-4][0-9]|25[0-5])$')
+    if [ $IP = 9 ]
+    then
+        HOSTS
+    elif [ "$ipvalido" != "" ]
+        then
+        sed -i /^$IP/d hostsfile
+        echo IP removed of cluster
+    else
+        echo Invalid IP, verify again
+        echo 
+        HOSTS_REMOVER
+    fi    
+}
+
+function IPTABLES () {
+    clear
+    echo IPTABLES MANAGER
+    echo \#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#
+    echo Type 1 to add rules
+    echo Type 2 to remove rules
+    echo Type 3 to show actual rules
+    echo Type 4 to reset rules
+    echo Type 0 to back
+    read option
+    if [ $option = 1 ]
+    then
+        IPTABLES_ADDREGRAS
+    elif [ $option = 2 ]
+    then
+        IPTABLES_RMREGRAS
+    elif [ $option = 3 ]
+    then
+        IPTABLES_VERREGRAS
+    elif [ $option = 4 ]
+    then
+        IPTABLES_ZERARREGRAS
+    elif [ $option = 0 ]
+    then
+        INICIO    
+    else
+        echo invalid option, try again
+    fi
+}
+
+function IPTABLES_ADDREGRAS () {
+    echo Type the rule to add on cluster
+    read $rule
+    for server in $(cat hostsfile)
+    do
+        ssh root@$server $rule
+    done
+    
+}
+    
 INICIO
