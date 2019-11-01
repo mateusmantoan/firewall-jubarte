@@ -1,9 +1,9 @@
 #!/bin/bash
 
-IMAGESNORT=mateusmantoan/snort:1.0
-IMAGESQUID=mateusmantoan/squid:1.0
-IMAGETCPDUMP=mateusmantoan/tcpump:1.0
-IMAGENMAP=mateusmantoan/nmap:1.0
+IMAGESNORT="mateusmantoan/snort:1.0"
+IMAGESQUID="mateusmantoan/squid:1.0"
+IMAGETCPDUMP="mateusmantoan/tcpump:1.0"
+IMAGENMAP="mateusmantoan/nmap:1.0"
 clear
 
 function INICIO () {
@@ -264,7 +264,7 @@ function SNORT_INSTALAR () {
     if [ $option = 1 ]
     then
         docker service create -td --network host --mode global --name snort $IMAGESNORT
-        echo "1" >> /etc/jubarte/snort-status
+        echo "1" > /etc/jubarte/snort-status
     elif [ $option = 0 ]
     then
         INICIO    
@@ -273,12 +273,12 @@ function SNORT_INSTALAR () {
         sleep 1
         SNORT_INSTALAR
     fi
-    
+}
 function SQUID () {
     clear
     echo SQUID
     echo \#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#
-    if [ `cat /etc/jubarte/squid-status` != 1 ]
+    if [ `` != 1 ]
     then
     SQUID_INSTALAR    
     fi
@@ -313,7 +313,7 @@ function SNORT_INSTALAR () {
     if [ $option = 1 ]
     then
         docker service create -td --network host --mode global --name snort $IMAGESQUID
-        echo "1" >> /etc/jubarte/squid-status
+        echo "1" > /etc/jubarte/squid-status
     elif [ $option = 0 ]
     then
         INICIO    
@@ -325,18 +325,7 @@ function SNORT_INSTALAR () {
 
 }
 
-echo Verifying sanity of system
+`docker swarm init --advertise-addr $(hostname -I | cut -d " " -f 1)`
 
-SWARMSTATUS=`docker node ls | grep ID |  cut -d " " -f 1`
-
-if [ $SWARMSTATUS != ID ]
-then
-    echo Swarm was down, init now
-    docker swarm init --advertise-addr $(hostname -I | cut -d " " -f 1)
-    echo 
-    echo Swarm was up
-fi
-
-sleep 3
 
 INICIO

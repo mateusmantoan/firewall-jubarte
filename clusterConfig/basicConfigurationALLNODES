@@ -20,8 +20,8 @@ systemctl restart ssh
 touch /etc/jubarte/hostsfile
 touch /etc/jubarte/iptables-actual
 touch /etc/jubarte/iptables-actual_TEMP
-touch /etc/jubarte/snort-status
-touch /etc/jubarte/squid-status
+echo "0" > /etc/jubarte/snort-status
+echo "0" > /etc/jubarte/squid-status
 mkdir /etc/jubarte/logs/
 mkdir /etc/jubarte/logs/tcpdump
 mkdir /etc/jubarte/logs/nmap
