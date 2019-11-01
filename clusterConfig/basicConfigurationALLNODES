@@ -17,12 +17,14 @@ echo "PermitRootLogin yes" >> /etc/ssh/sshd_config
 systemctl restart ssh
 
 #create manager files
-touch /etc/hostsfile
-touch /etc/iptables-actual
-touch /etc/iptables-actual_TEMP
-touch /etc/snort-status
-touch /etc/squid-status
-mkdir /etc/logs/
-mkdir /etc/logs/tcpdump
-mkdir /etc/logs/nmap
-mkdir /etc/logs/snort
+touch /etc/jubarte/hostsfile
+touch /etc/jubarte/iptables-actual
+touch /etc/jubarte/iptables-actual_TEMP
+touch /etc/jubarte/snort-status
+touch /etc/jubarte/squid-status
+mkdir /etc/jubarte/logs/
+mkdir /etc/jubarte/logs/tcpdump
+mkdir /etc/jubarte/logs/nmap
+mkdir /etc/jubarte/logs/snort
+iptables-save >> /etc/jubarte/iptables-clean
+

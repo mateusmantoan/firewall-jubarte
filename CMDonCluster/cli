@@ -1,5 +1,9 @@
 #!/bin/bash
 
+IMAGESNORT=mateusmantoan/snort:1.0
+IMAGESQUID=mateusmantoan/squid:1.0
+IMAGETCPDUMP=mateusmantoan/tcpump:1.0
+IMAGENMAP=mateusmantoan/nmap:1.0
 clear
 
 function INICIO () {
@@ -52,7 +56,7 @@ function HOSTS () {
     clear
     echo MANAGER HOSTS
     echo Actual hosts:
-    cat /etc/hostsfile
+    cat /etc/jubarte/hostsfile
     echo \#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#
     echo Type 1 to include hosts
     echo Type 2 to remove hosts
@@ -84,10 +88,15 @@ function HOSTS_ADICIONAR () {
         HOSTS
     elif [ "$ipvalido" != "" ]
         then
-        echo $IP >> /etc/hostsfile
         JOIN_TOKEN=`docker swarm join-token manager | grep swarm`
         ssh root@$IP "$JOIN_TOKEN"
-        ssh root@$IP "iptables-restore < /etc/iptables-actual"
+        ssh root@$IP "iptables-restore < /etc/jubarte/iptables-actual"
+        ssh root@$IP "rm -rf /etc/jubarte"
+        scp -r /etc/jubarte root@$IP:/etc/
+        for server in $(cat /etc/jubarte/hostsfile)
+        do
+            ssh root@$server "echo $IP >> /etc/jubarte/hostsfile"
+            done
         echo IP included on cluster
     else
         echo Invalid IP, verify again
@@ -106,7 +115,10 @@ function HOSTS_REMOVER () {
         HOSTS
     elif [ "$ipvalido" != "" ]
         then
-        sed -i /^$IP/d /etc/hostsfile
+        for server in $(cat /etc/jubarte/hostsfile)
+        do
+            ssh root@$server "sed -i /^$IP/d /etc/jubarte/hostsfile"
+            done
         echo IP removed of cluster
     else
         echo Invalid IP, verify again
@@ -156,12 +168,12 @@ function IPTABLES_ADDREGRAS () {
     then
         IPTABLES
     else
-    for server in $(cat /etc/hostsfile)
+    for server in $(cat /etc/jubarte/hostsfile)
     do
         ssh root@$server "$RULE"
-        ssh root@$server "/sbin/iptables-save >> /etc/iptables-actual_TEMP"
-        ssh root@$server "rm /etc/iptables-actual"
-        ssh root@$server "mv /etc/iptables-actual_TEMP /etc/iptables-actual"
+        ssh root@$server "/sbin/iptables-save >> /etc/jubarte/iptables-actual_TEMP"
+        ssh root@$server "rm /etc/jubarte/iptables-actual"
+        ssh root@$server "mv /etc/jubarte/iptables-actual_TEMP /etc/jubarte/iptables-actual"
         done
         
     echo rule included on cluster
@@ -179,12 +191,12 @@ function IPTABLES_RMREGRAS () {
     then
         IPTABLES
     else
-    for server in $(cat /etc/hostsfile)
+    for server in $(cat /etc/jubarte/hostsfile)
     do
         ssh root@$server "$RULE"
-        ssh root@$server "iptables-save >> /etc/iptables-actual_TEMP"
-        ssh root@$server "rm /etc/iptables-actual"
-        ssh root@$server "mv /etc/iptables-actual_TEMP /etc/iptables-actual"
+        ssh root@$server "iptables-save >> /etc/jubarte/iptables-actual_TEMP"
+        ssh root@$server "rm /etc/jubarte/iptables-actual"
+        ssh root@$server "mv /etc/jubarte/iptables-actual_TEMP /etc/jubarte/iptables-actual"
         done
     echo rule removed of cluster
     sleep 1
@@ -204,7 +216,7 @@ function IPTABLES_VERREGRAS () {
 
 function IPTABLES_ZERARREGRAS () {
     clear
-    iptables-restore < /etc/iptables-clean
+    iptables-restore < /etc/jubarte/iptables-clean
     echo 
     echo IPtables rules restored
     echo
@@ -212,5 +224,119 @@ function IPTABLES_ZERARREGRAS () {
     read RULE
     IPTABLES
 }
+
+function SNORT () {
+    clear
+    echo SNORT
+    echo \#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#
+    if [ `cat /etc/jubarte/snort-status` != 1 ]
+    then
+    SNORT_INSTALAR    
+    fi
+    echo Type 1 to 
+    echo Type 2 to 
+    echo Type 3 to 
+    echo Type 0 to back
+    read option
+    if [ $option = 1 ]
+    then
+        SNORT_
+    elif [ $option = 2 ]
+    then
+        SNORT_
+    elif [ $option = 3 ]
+    then
+        SNORT_
+    elif [ $option = 0 ]
+    then
+        INICIO    
+    else
+        echo invalid option, try again
+        sleep 1
+        SNORT
+    fi
+}
+
+function SNORT_INSTALAR () {
+    echo Type 1 to install snort on cluster
+    echo Type 0 to back
+    read option
+    if [ $option = 1 ]
+    then
+        docker service create -td --network host --mode global --name snort $IMAGESNORT
+        echo "1" >> /etc/jubarte/snort-status
+    elif [ $option = 0 ]
+    then
+        INICIO    
+    else
+        echo invalid option, try again
+        sleep 1
+        SNORT_INSTALAR
+    fi
+    
+function SQUID () {
+    clear
+    echo SQUID
+    echo \#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#
+    if [ `cat /etc/jubarte/squid-status` != 1 ]
+    then
+    SQUID_INSTALAR    
+    fi
+    echo Type 1 to 
+    echo Type 2 to 
+    echo Type 3 to 
+    echo Type 0 to back
+    read option
+    if [ $option = 1 ]
+    then
+        SNORT_
+    elif [ $option = 2 ]
+    then
+        SNORT_
+    elif [ $option = 3 ]
+    then
+        SNORT_
+    elif [ $option = 0 ]
+    then
+        INICIO    
+    else
+        echo invalid option, try again
+        sleep 1
+        SNORT
+    fi
+}
+
+function SNORT_INSTALAR () {
+    echo Type 1 to install the squid on cluster
+    echo Type 0 to back
+    read option
+    if [ $option = 1 ]
+    then
+        docker service create -td --network host --mode global --name snort $IMAGESQUID
+        echo "1" >> /etc/jubarte/squid-status
+    elif [ $option = 0 ]
+    then
+        INICIO    
+    else
+        echo invalid option, try again
+        sleep 1
+        SQUID_INSTALAR
+    fi 
+
+}
+
+echo Verifying sanity of system
+
+SWARMSTATUS=`docker node ls | grep ID |  cut -d " " -f 1`
+
+if [ $SWARMSTATUS != ID ]
+then
+    echo Swarm was down, init now
+    docker swarm init --advertise-addr $(hostname -I | cut -d " " -f 1)
+    echo 
+    echo Swarm was up
+fi
+
+sleep 3
 
 INICIO
