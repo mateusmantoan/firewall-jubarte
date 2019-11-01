@@ -2,5 +2,3 @@
 
 docker swarm init --advertise-addr $(hostname -I | cut -d " " -f 1)
 
-#here will be generated the join token, this token need to be applied on all slave nodes
-#to see the token again use he cmd "docker swarm join-token"

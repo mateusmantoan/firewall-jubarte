@@ -4,10 +4,15 @@ clear
 
 function INICIO () {
     clear
-    echo  JUBARTE FIREWALL COMMAND LINE INTERFACE
+    echo "   ___       _                _        ______ _                        _ _ "
+    echo "  |_  |     | |              | |       |  ___(_)                      | | |"
+    echo "    | |_   _| |__   __ _ _ __| |_ ___  | |_   _ _ __ _____      ____ _| | |"
+    echo "    | | | | | '_ \ / _| | |__| __/ _ \ |  _| | | |__/ _ \ \ /\ / / _| | | |"
+    echo "/\__/ / |_| | |_) | (_| | |  | ||  __/ | |   | | | |  __/\ V  V / (_| | | |"
+    echo "\____/ \__,_|_.__/ \__,_|_|   \__\___| \_|   |_|_|  \___| \_/\_/ \__,_|_|_|"
     echo
+    echo COMMAND LINE INTERFACE
     echo
-
     echo Type 1 to manage hosts
     echo Type 2 to manage iptaples rules
     echo Type 3 to configure snort
@@ -29,12 +34,17 @@ function INICIO () {
     elif [ $option = 4 ]
     then
         SQUID
+    elif [ $option = 5 ]
+    then
+        TCPDUMP_NMAP
     elif [ $option = 0 ]
     then
         clear
         exit 0    
     else
         echo invalid option, try again
+        sleep 2
+        INICIO
     fi
 }
     
@@ -42,7 +52,7 @@ function HOSTS () {
     clear
     echo MANAGER HOSTS
     echo Actual hosts:
-    cat hostsfile
+    cat /etc/hostsfile
     echo \#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#
     echo Type 1 to include hosts
     echo Type 2 to remove hosts
@@ -59,6 +69,8 @@ function HOSTS () {
         INICIO    
     else
         echo invalid option, try again
+        sleep 1
+        HOSTS
     fi
 }
 
@@ -72,11 +84,14 @@ function HOSTS_ADICIONAR () {
         HOSTS
     elif [ "$ipvalido" != "" ]
         then
-        echo $IP >> hostsfile
+        echo $IP >> /etc/hostsfile
+        JOIN_TOKEN=`docker swarm join-token manager | grep swarm`
+        ssh root@$IP "$JOIN_TOKEN"
+        ssh root@$IP "iptables-restore < /etc/iptables-actual"
         echo IP included on cluster
     else
         echo Invalid IP, verify again
-        echo 
+        sleep 1
         HOSTS_ADICIONAR
     fi    
 }
@@ -91,7 +106,7 @@ function HOSTS_REMOVER () {
         HOSTS
     elif [ "$ipvalido" != "" ]
         then
-        sed -i /^$IP/d hostsfile
+        sed -i /^$IP/d /etc/hostsfile
         echo IP removed of cluster
     else
         echo Invalid IP, verify again
@@ -127,6 +142,7 @@ function IPTABLES () {
         INICIO    
     else
         echo invalid option, try again
+        sleep 1
         IPTABLES
     fi
 }
@@ -140,10 +156,14 @@ function IPTABLES_ADDREGRAS () {
     then
         IPTABLES
     else
-    for server in $(cat hostsfile)
+    for server in $(cat /etc/hostsfile)
     do
         ssh root@$server "$RULE"
+        ssh root@$server "/sbin/iptables-save >> /etc/iptables-actual_TEMP"
+        ssh root@$server "rm /etc/iptables-actual"
+        ssh root@$server "mv /etc/iptables-actual_TEMP /etc/iptables-actual"
         done
+        
     echo rule included on cluster
     sleep 1
     fi
@@ -159,9 +179,12 @@ function IPTABLES_RMREGRAS () {
     then
         IPTABLES
     else
-    for server in $(cat hostsfile)
+    for server in $(cat /etc/hostsfile)
     do
         ssh root@$server "$RULE"
+        ssh root@$server "iptables-save >> /etc/iptables-actual_TEMP"
+        ssh root@$server "rm /etc/iptables-actual"
+        ssh root@$server "mv /etc/iptables-actual_TEMP /etc/iptables-actual"
         done
     echo rule removed of cluster
     sleep 1
@@ -189,5 +212,5 @@ function IPTABLES_ZERARREGRAS () {
     read RULE
     IPTABLES
 }
-    
+
 INICIO

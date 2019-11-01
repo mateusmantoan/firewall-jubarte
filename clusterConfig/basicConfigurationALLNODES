@@ -15,3 +15,14 @@ apt clean
 #configure ssh for remote access
 echo "PermitRootLogin yes" >> /etc/ssh/sshd_config
 systemctl restart ssh
+
+#create manager files
+touch /etc/hostsfile
+touch /etc/iptables-actual
+touch /etc/iptables-actual_TEMP
+touch /etc/snort-status
+touch /etc/squid-status
+mkdir /etc/logs/
+mkdir /etc/logs/tcpdump
+mkdir /etc/logs/nmap
+mkdir /etc/logs/snort

@@ -1,0 +1,6 @@
+read rule
+
+for server in $(cat hostsfile)
+    do
+        sshpass -p "toor" ssh root@$server "$rule"
+    done
