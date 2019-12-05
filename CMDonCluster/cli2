@@ -64,7 +64,8 @@ function INICIO () {
         INICIO
     fi
 }
- 
+
+
 #HOSTS FUNCTIONS
 
 function HOSTS () {
@@ -142,7 +143,8 @@ function HOSTS_REMOVER () {
     fi    
 }
 
-#HOSTS IPTABLES
+
+#IPTABLES FUNCTIONS
 
 function IPTABLES () {
     clear
@@ -155,7 +157,7 @@ function IPTABLES () {
     read option
     if [ $option = 1 ]
     then
-        IPTABLES_APPREGRAS
+        IPTABLES_ADDREGRAS
     elif [ $option = 2 ]
     then
         IPTABLES_VERREGRAS
@@ -216,47 +218,18 @@ function IPTABLES_ZERARREGRAS () {
     IPTABLES
 }
 
-#HOSTS TCPDUMP
+
+#FUNCTIONS TCPDUMP
 
 function TCPDUMP () {
     clear
-    echo TCPDUMP MANAGER
+    echo TCPDUMP OPTIONS
     echo \#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#
-    echo Type 1 to sniff traffic
-    echo
-    echo ALL LOGS OF TCPDUMP ARE IN /etc/jubarte/log/tcpdump/
-    echo 
-    DUMPALLSTATUS=`cat /etc/jubarte/var/dumpall`
-    if [ "$DUMPALLSTATUS" != 1 ]
-    then
-        echo Type 2 to start dump on all cluster
-    else
-        echo The dump of all cluster are operating now
-    fi
-    echo Type 0 to back
-    read option
-    if [ $option = 1 ]
-    then
-        TCPDUMP_SNIFF
-    elif [ $option = 2 ]
-    then
-        TCPDUMP_ALL_START
-    elif [ $option = 0 ]
-    then
-        INICIO    
-    else
-        echo invalid option, try again
-        sleep 1
-        TCPDUMP
-    fi 
-}
-
-function TCPDUMP_SNIFF () {
     echo Type 1 to sniff cluster traffic now
     echo Type 2 to create sniff rules
     echo Type 3 to see the actual rules
     echo Type 4 to remove sniff rules
-    echo Type 0 to back tcpdump options
+    echo Type 0 to back start menu
     read option
     
     if [ $option = 1 ]
@@ -273,11 +246,11 @@ function TCPDUMP_SNIFF () {
         TCPDUMP_REMOVE_RULES
     elif [ $option = 0 ]
     then
-        TCPDUMP    
+        INICIO    
     else
         echo invalid option, try again
         sleep 1
-        TCPDUMP_SNIFF
+        TCPDUMP
     fi 
 }
 
@@ -296,36 +269,124 @@ function TCPDUMP_SNIFF_NOW () {
 }
 
 function TCPDUMP_SNIFF_RULES () {
+    clear
     echo "Type the name of rule (one string, no spaces)"
     read NAME
     TCPDUMPRULENAME=`echo "$NAME" | sed "s, ,,g"`
     
-    echo "$TCPDUMPRULENAME | $RULE" >> /etc/jubarte/var/tcpdumprules
     echo Type the tcpdump command
     echo *the interfaces of firewall are ${INT0} and ${INT1}
     read TCPDUMPCMD
-    `docker run -itd --restart always --net host --name ${TCPDUMPRULENAME} --volume /etc/jubarte/logs/tcpdump/:/root/logs/tcpdump/ ${IMAGETCPDUMP} ${TCPDUMPCMD} -w /root/logs/tcpdump/${TCPDUMPRULENAME}.pcap`
+    echo "$TCPDUMPRULENAME | $TCPDUMPCMD" >> /etc/jubarte/var/tcpdumprules
+    docker run -itd --restart always --net host --name ${TCPDUMPRULENAME} --volume /etc/jubarte/log/tcpdump/:/root/logs/tcpdump/ ${IMAGETCPDUMP} ${TCPDUMPCMD} -w /root/logs/tcpdump/${TCPDUMPRULENAME}.pcap
+    TCPDUMP
     
 }
 
 function TCPDUMP_SEE_RULES () {
-    echo -n "Actual rules\n"
-    cat /etc/jubarte/var/tcpdumprules
+    clear
+    echo -n "Actual rules"
+    echo
+    docker ps -a --no-trunc -f ancestor=${IMAGETCPDUMP} --format "table {{.Names}}\t{{.Command}}"
+    echo 
+    echo Press [ENTER] to back TCPDUMP menu
+    read 
+    TCPDUMP
 }
 
 function TCPDUMP_REMOVE_RULES () {
     echo Type the name of rule to be removed
     read NAME
     docker rm -f ${NAME}
-    sed -i '/${NAME}/d' /etc/jubarte/var/tcpdumprules
+    TCPDUMP
+}
+
+
+#FUNCTIONS NMAP
+
+function NMAP () {
+    clear
+    echo NMAP OPTIONS
+    echo \#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#
+    echo Type 1 to scan cluster ports now
+ #   echo Type 2 to create port scan rules
+ #   echo Type 3 to see the actual rules
+ #   echo Type 4 to remove port scan rules
+    echo Type 0 to back NMAP options
+    read option
+    
+    if [ $option = 1 ]
+    then
+        NMAP_SNIFF_NOW
+    elif [ $option = 2 ]
+    then
+        NMAP_SNIFF_RULES
+    elif [ $option = 3 ]
+    then
+        NMAP_SEE_RULES
+    elif [ $option = 4 ]
+    then
+        NMAP_REMOVE_RULES
+    elif [ $option = 0 ]
+    then
+        INICIO    
+    else
+        echo invalid option, try again
+        sleep 1
+        NMAP
+    fi 
+}
+
+function NMAP_SNIFF_NOW () {
+    echo Type the NMAP command
+    echo *the interfaces of firewall are $INT0 and $INT1
+    echo **Stop capture with Ctrl+C
+    read NMAPCMD
+    docker run --net host --rm ${IMAGENMAP} ${NMAPCMD}
+    echo
+    echo
+    echo
+    echo Type enter to back
+    clear
+    NMAP    
+}
+
+function NMAP_SNIFF_RULES () {
+    clear
+    echo "Type the name of rule (one string, no spaces)"
+    read NAME
+    NMAPRULENAME=`echo "$NAME" | sed "s, ,,g"`
+    
+    echo Type the NMAP command
+    echo *the interfaces of firewall are ${INT0} and ${INT1}
+    read NMAPCMD
+    echo "frequency of scan (in seconds)"
+    read FREQUENCY
+    docker run -itd --restart always --net host --name ${NMAPRULENAME} --volume /etc/jubarte/log/nmap/:/root/logs/nmap/ ${IMAGENMAP} ${NMAPCMD} -w /root/logs/nmap/${NMAPRULENAME}
+    NMAP
     
 }
 
-
-function TCPDUMP_ALL_START () {
-    docker run -itd --restart always --net host --name dumpall --volume /etc/jubarte/logs/tcpdump/:/root/logs/tcpdump/ ${IMAGETCPDUMP} tcpdump -vvv -i ${INT0} -w /root/logs/tcpdump/dumpall.pcap
-    echo 1 > /etc/jubarte/var/dumpall
+function NMAP_SEE_RULES () {
+    clear
+    echo "Actual rules"
+    echo
+    docker ps -a --no-trunc -f ancestor=${IMAGENMAP} --format "table {{.Names}}\t{{.Command}}"
+    echo 
+    echo Press [ENTER] to back NMAP menu
+    read 
+    NMAP
 }
+
+function NMAP_REMOVE_RULES () {
+    echo Type the name of rule to be removed
+    read NAME
+    docker rm -f ${NAME}
+    NMAP
+}
+
+
+#SNORT FUNCTIONS
 
 function SNORT () {
     clear
