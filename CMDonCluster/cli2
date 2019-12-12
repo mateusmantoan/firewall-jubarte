@@ -8,7 +8,7 @@ INT0="wlp3s0"
 INT1="eth1"
 
 clear
-alias iptables="/sbin/iptables"
+alias iptables=/sbin/iptables
 
 touch /etc/jubarte/status
 touch /etc/jubarte/var/dumpall
@@ -178,28 +178,34 @@ function IPTABLES_ADDREGRAS () {
     clear
     echo Type the rule to apply on cluster
     echo Type 9 to back to iptables menu
-    read RULE
-    if [ $RULE = 9 ]
+    read "RULE"
+    if [ "$RULE" = 9 ]
     then
         IPTABLES
     else
-    for server in $(cat /etc/jubarte/hostsfile)
-    do
-        sshpass -p "toor" ssh root@$server "$RULE"
-        sshpass -p "toor" ssh root@$server "/sbin/iptables-save >> /etc/jubarte/iptables-actual_TEMP"
-        sshpass -p "toor" ssh root@$server "rm /etc/jubarte/iptables-actual"
-        sshpass -p "toor" ssh root@$server "mv /etc/jubarte/iptables-actual_TEMP /etc/jubarte/iptables-actual"
-        done
-        
-    echo rule included on cluster
-    sleep 1
+#    for server in $(cat /etc/jubarte/hostsfile)
+#    do
+#        sshpass -p "toor" ssh root@$server "$RULE"
+#        sshpass -p "toor" ssh root@$server "/sbin/iptables-save >> /etc/jubarte/iptables-actual_TEMP"
+#        sshpass -p "toor" ssh root@$server "rm /etc/jubarte/iptables-actual"
+#        sshpass -p "toor" ssh root@$server "mv /etc/jubarte/iptables-actual_TEMP /etc/jubarte/iptables-actual"
+#        done
+    $RULE
+    
+ #
+    echo rule $RULE applied on cluster
+    WAAAAAAAIT
     fi
     IPTABLES
 }
 
+function WAAAAAAAIT () {
+    for counter in {1..5}; do echo .; sleep 0.5; done
+}
+
 function IPTABLES_VERREGRAS () {
     clear
-    iptables -L
+    /sbin/iptables -L
     echo
     echo
     echo Type ENTER to back to iptables menu
@@ -209,7 +215,8 @@ function IPTABLES_VERREGRAS () {
 
 function IPTABLES_ZERARREGRAS () {
     clear
-    iptables-restore < /etc/jubarte/iptables-clean
+    #iptables-restore < /etc/jubarte/iptables-clean
+    /sbin/iptables -F
     echo 
     echo IPtables rules restored
     echo
@@ -230,6 +237,7 @@ function TCPDUMP () {
     echo Type 3 to see the actual rules
     echo Type 4 to remove sniff rules
     echo Type 0 to back start menu
+    echo
     read option
     
     if [ $option = 1 ]
@@ -300,7 +308,6 @@ function TCPDUMP_REMOVE_RULES () {
     docker rm -f ${NAME}
     TCPDUMP
 }
-
 
 #FUNCTIONS NMAP
 
