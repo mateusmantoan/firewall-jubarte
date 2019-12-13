@@ -217,6 +217,9 @@ function IPTABLES_ZERARREGRAS () {
     clear
     #iptables-restore < /etc/jubarte/iptables-clean
     /sbin/iptables -F
+    /sbin/iptables -P INPUT ACCEPT
+    /sbin/iptables -P OUTPUT ACCEPT
+    /sbin/iptables -P FORWARD ACCEPT
     echo 
     echo IPtables rules restored
     echo
@@ -316,9 +319,9 @@ function NMAP () {
     echo NMAP OPTIONS
     echo \#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#
     echo Type 1 to scan cluster ports now
- #   echo Type 2 to create port scan rules
- #   echo Type 3 to see the actual rules
- #   echo Type 4 to remove port scan rules
+  #  echo Type 2 to create port scan rules
+  #  echo Type 3 to see the actual rules
+  #  echo Type 4 to remove port scan rules
     echo Type 0 to back NMAP options
     read option
     
@@ -349,7 +352,7 @@ function NMAP_SNIFF_NOW () {
     echo *the interfaces of firewall are $INT0 and $INT1
     echo **Stop capture with Ctrl+C
     read NMAPCMD
-    docker run --net host --rm ${IMAGENMAP} ${NMAPCMD}
+    docker run -t --net host --name nmapqweqwe ${IMAGENMAP} ${NMAPCMD} 
     echo
     echo
     echo
@@ -369,7 +372,7 @@ function NMAP_SNIFF_RULES () {
     read NMAPCMD
     echo "frequency of scan (in seconds)"
     read FREQUENCY
-    docker run -itd --restart always --net host --name ${NMAPRULENAME} --volume /etc/jubarte/log/nmap/:/root/logs/nmap/ ${IMAGENMAP} ${NMAPCMD} -w /root/logs/nmap/${NMAPRULENAME}
+    docker run -itd --restart always --net host --name ${NMAPRULENAME} --volume /etc/jubarte/log/nmap/:/root/logs/nmap/ ${IMAGENMAP} ${NMAPCMD} -o /root/logs/nmap/${NMAPRULENAME}/$(date +%d-%m-%Y-%R-%S)
     NMAP
     
 }

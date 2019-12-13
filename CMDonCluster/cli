@@ -4,7 +4,9 @@ IMAGESNORT="mateusmantoan/snort:1.0"
 IMAGESQUID="mateusmantoan/squid:1.0"
 IMAGETCPDUMP="mateusmantoan/tcpump:1.0"
 IMAGENMAP="mateusmantoan/nmap:1.0"
+DEFAULTPASS="toor"
 clear
+alias iptables="/sbin/iptables"
 
 function INICIO () {
     clear
@@ -89,13 +91,13 @@ function HOSTS_ADICIONAR () {
     elif [ "$ipvalido" != "" ]
         then
         JOIN_TOKEN=`docker swarm join-token manager | grep swarm`
-        ssh root@$IP "$JOIN_TOKEN"
-        ssh root@$IP "iptables-restore < /etc/jubarte/iptables-actual"
-        ssh root@$IP "rm -rf /etc/jubarte"
-        scp -r /etc/jubarte root@$IP:/etc/
+        sshpass -p "${DEFAULTPASS}" ssh root@$IP "$JOIN_TOKEN"
+        sshpass -p "${DEFAULTPASS}" ssh root@$IP "iptables-restore < /etc/jubarte/iptables-actual"
+        sshpass -p "${DEFAULTPASS}" ssh root@$IP "rm -rf /etc/jubarte"
+        sshpass -p "${DEFAULTPASS}" scp -r /etc/jubarte root@$IP:/etc/
         for server in $(cat /etc/jubarte/hostsfile)
         do
-            ssh root@$server "echo $IP >> /etc/jubarte/hostsfile"
+            sshpass -p "${DEFAULTPASS}" ssh root@$server "echo $IP >> /etc/jubarte/hostsfile"
             done
         echo IP included on cluster
     else
@@ -117,7 +119,7 @@ function HOSTS_REMOVER () {
         then
         for server in $(cat /etc/jubarte/hostsfile)
         do
-            ssh root@$server "sed -i /^$IP/d /etc/jubarte/hostsfile"
+            sshpass -p "${DEFAULTPASS}" ssh root@$server "sed -i /^$IP/d /etc/jubarte/hostsfile"
             done
         echo IP removed of cluster
     else
@@ -170,10 +172,10 @@ function IPTABLES_ADDREGRAS () {
     else
     for server in $(cat /etc/jubarte/hostsfile)
     do
-        ssh root@$server "$RULE"
-        ssh root@$server "/sbin/iptables-save >> /etc/jubarte/iptables-actual_TEMP"
-        ssh root@$server "rm /etc/jubarte/iptables-actual"
-        ssh root@$server "mv /etc/jubarte/iptables-actual_TEMP /etc/jubarte/iptables-actual"
+        sshpass -p "${DEFAULTPASS}" ssh root@$server "$RULE"
+        sshpass -p "${DEFAULTPASS}" ssh root@$server "/sbin/iptables-save >> /etc/jubarte/iptables-actual_TEMP"
+        sshpass -p "${DEFAULTPASS}" ssh root@$server "rm /etc/jubarte/iptables-actual"
+        sshpass -p "${DEFAULTPASS}" ssh root@$server "mv /etc/jubarte/iptables-actual_TEMP /etc/jubarte/iptables-actual"
         done
         
     echo rule included on cluster
@@ -193,10 +195,10 @@ function IPTABLES_RMREGRAS () {
     else
     for server in $(cat /etc/jubarte/hostsfile)
     do
-        ssh root@$server "$RULE"
-        ssh root@$server "iptables-save >> /etc/jubarte/iptables-actual_TEMP"
-        ssh root@$server "rm /etc/jubarte/iptables-actual"
-        ssh root@$server "mv /etc/jubarte/iptables-actual_TEMP /etc/jubarte/iptables-actual"
+        sshpass -p "${DEFAULTPASS}" ssh root@$server "$RULE"
+        sshpass -p "${DEFAULTPASS}" ssh root@$server "iptables-save >> /etc/jubarte/iptables-actual_TEMP"
+        sshpass -p "${DEFAULTPASS}" ssh root@$server "rm /etc/jubarte/iptables-actual"
+        sshpass -p "${DEFAULTPASS}" ssh root@$server "mv /etc/jubarte/iptables-actual_TEMP /etc/jubarte/iptables-actual"
         done
     echo rule removed of cluster
     sleep 1
@@ -316,11 +318,11 @@ function SNORT_INSTALAR () {
         echo "1" > /etc/jubarte/squid-status
     elif [ $option = 0 ]
     then
-        INICIO    
+        INICIO
     else
         echo invalid option, try again
         sleep 1
-        SQUID_INSTALAR
+        SQUID_INSTALAR 
     fi 
 
 }
