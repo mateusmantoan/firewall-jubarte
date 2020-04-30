@@ -2,11 +2,19 @@
 
 IMAGESNORT="mateusmantoan/snort:1.0"
 IMAGESQUID="mateusmantoan/squid:1.0"
-IMAGETCPDUMP="mateusmantoan/tcpump:1.0"
+IMAGETCPDUMP="mateusmantoan/tcpdump:1.0"
 IMAGENMAP="mateusmantoan/nmap:1.0"
 DEFAULTPASS="toor"
+INT0="wlp3s0"
+INT1="eth1"
+
 clear
 alias iptables="/sbin/iptables"
+
+touch /etc/jubarte/status
+touch /etc/jubarte/var/dumpall
+
+#if [ cat "/etc/jubarte/status" != 0]
 
 function INICIO () {
     clear
@@ -23,7 +31,8 @@ function INICIO () {
     echo Type 2 to manage iptaples rules
     echo Type 3 to configure snort
     echo Type 4 to configure squid
-    echo Type 5 to use tcpdump and nmap
+    echo Type 5 to use tcpdump
+    echo Type 6 to use nmap
     echo
     echo Type 0 to close CLI
     read option
@@ -42,7 +51,10 @@ function INICIO () {
         SQUID
     elif [ $option = 5 ]
     then
-        TCPDUMP_NMAP
+        TCPDUMP
+    elif [ $option = 6 ]
+    then
+        NMAP
     elif [ $option = 0 ]
     then
         clear
@@ -53,7 +65,10 @@ function INICIO () {
         INICIO
     fi
 }
-    
+
+
+#HOSTS FUNCTIONS
+
 function HOSTS () {
     clear
     echo MANAGER HOSTS
@@ -72,7 +87,7 @@ function HOSTS () {
         HOSTS_REMOVER
     elif [ $option = 0 ]
     then
-        INICIO    
+        INICIO
     else
         echo invalid option, try again
         sleep 1
@@ -128,6 +143,14 @@ function HOSTS_REMOVER () {
         HOSTS_REMOVER
     fi    
 }
+
+
+function WAAAAAAAIT () {
+    for counter in {1..5}; do echo .; sleep 0.5; done
+}
+
+
+#IPTABLES FUNCTIONS
 
 function IPTABLES () {
     clear
@@ -219,6 +242,10 @@ function IPTABLES_VERREGRAS () {
 function IPTABLES_ZERARREGRAS () {
     clear
     iptables-restore < /etc/jubarte/iptables-clean
+    iptables -F
+    iptables -P INPUT ACCEPT
+    iptables -P OUTPUT ACCEPT
+    iptables -P FORWARD ACCEPT
     echo 
     echo IPtables rules restored
     echo
@@ -226,6 +253,176 @@ function IPTABLES_ZERARREGRAS () {
     read RULE
     IPTABLES
 }
+
+
+#FUNCTIONS TCPDUMP
+
+function TCPDUMP () {
+    clear
+    echo TCPDUMP OPTIONS
+    echo \#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#
+    echo Type 1 to sniff cluster traffic now
+    echo Type 2 to create sniff rules
+    echo Type 3 to see the actual rules
+    echo Type 4 to remove sniff rules
+    echo Type 0 to back start menu
+    echo
+    read option
+    
+    if [ $option = 1 ]
+    then
+        TCPDUMP_SNIFF_NOW
+    elif [ $option = 2 ]
+    then
+        TCPDUMP_SNIFF_RULES
+    elif [ $option = 3 ]
+    then
+        TCPDUMP_SEE_RULES
+    elif [ $option = 4 ]
+    then
+        TCPDUMP_REMOVE_RULES
+    elif [ $option = 0 ]
+    then
+        INICIO    
+    else
+        echo invalid option, try again
+        sleep 1
+        TCPDUMP
+    fi 
+}
+
+function TCPDUMP_SNIFF_NOW () {
+    echo Type the tcpdump command
+    echo *the interfaces of firewall are $INT0 and $INT1
+    echo **Stop capture with Ctrl+C
+    read TCPDUMPCMD
+    docker run --net host --rm ${IMAGETCPDUMP} ${TCPDUMPCMD}
+    echo
+    echo
+    echo
+    echo Type enter to back
+    clear
+    TCPDUMP    
+}
+
+function TCPDUMP_SNIFF_RULES () {
+    clear
+    echo "Type the name of rule (one string, no spaces)"
+    read NAME
+    TCPDUMPRULENAME=`echo "$NAME" | sed "s, ,,g"`
+    
+    echo Type the tcpdump command
+    echo *the interfaces of firewall are ${INT0} and ${INT1}
+    read TCPDUMPCMD
+    echo "$TCPDUMPRULENAME | $TCPDUMPCMD" >> /etc/jubarte/var/tcpdumprules
+    docker run -itd --restart always --net host --name ${TCPDUMPRULENAME} --volume /etc/jubarte/log/tcpdump/:/root/logs/tcpdump/ ${IMAGETCPDUMP} ${TCPDUMPCMD} -w /root/logs/tcpdump/${TCPDUMPRULENAME}.pcap
+    TCPDUMP
+    
+}
+
+function TCPDUMP_SEE_RULES () {
+    clear
+    echo -n "Actual rules"
+    echo
+    docker ps -a --no-trunc -f ancestor=${IMAGETCPDUMP} --format "table {{.Names}}\t{{.Command}}"
+    echo 
+    echo Press [ENTER] to back TCPDUMP menu
+    read 
+    TCPDUMP
+}
+
+function TCPDUMP_REMOVE_RULES () {
+    echo Type the name of rule to be removed
+    read NAME
+    docker rm -f ${NAME}
+    TCPDUMP
+}
+
+#FUNCTIONS NMAP
+
+function NMAP () {
+    clear
+    echo NMAP OPTIONS
+    echo \#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#
+    echo Type 1 to scan cluster ports now
+  #  echo Type 2 to create port scan rules
+  #  echo Type 3 to see the actual rules
+  #  echo Type 4 to remove port scan rules
+    echo Type 0 to back NMAP options
+    read option
+    
+    if [ $option = 1 ]
+    then
+        NMAP_SNIFF_NOW
+    elif [ $option = 2 ]
+    then
+        NMAP_SNIFF_RULES
+    elif [ $option = 3 ]
+    then
+        NMAP_SEE_RULES
+    elif [ $option = 4 ]
+    then
+        NMAP_REMOVE_RULES
+    elif [ $option = 0 ]
+    then
+        INICIO    
+    else
+        echo invalid option, try again
+        sleep 1
+        NMAP
+    fi 
+}
+
+function NMAP_SNIFF_NOW () {
+    echo Type the NMAP command
+    echo *the interfaces of firewall are $INT0 and $INT1
+    echo **Stop capture with Ctrl+C
+    read NMAPCMD
+    docker run -t --net host --name nmapqweqwe ${IMAGENMAP} ${NMAPCMD} 
+    echo
+    echo
+    echo
+    echo Type enter to back
+    clear
+    NMAP    
+}
+
+function NMAP_SNIFF_RULES () {
+    clear
+    echo "Type the name of rule (one string, no spaces)"
+    read NAME
+    NMAPRULENAME=`echo "$NAME" | sed "s, ,,g"`
+    
+    echo Type the NMAP command
+    echo *the interfaces of firewall are ${INT0} and ${INT1}
+    read NMAPCMD
+    echo "frequency of scan (in seconds)"
+    read FREQUENCY
+    docker run -itd --restart always --net host --name ${NMAPRULENAME} --volume /etc/jubarte/log/nmap/:/root/logs/nmap/ ${IMAGENMAP} ${NMAPCMD} -o /root/logs/nmap/${NMAPRULENAME}/$(date +%d-%m-%Y-%R-%S)
+    NMAP
+    
+}
+
+function NMAP_SEE_RULES () {
+    clear
+    echo "Actual rules"
+    echo
+    docker ps -a --no-trunc -f ancestor=${IMAGENMAP} --format "table {{.Names}}\t{{.Command}}"
+    echo 
+    echo Press [ENTER] to back NMAP menu
+    read 
+    NMAP
+}
+
+function NMAP_REMOVE_RULES () {
+    echo Type the name of rule to be removed
+    read NAME
+    docker rm -f ${NAME}
+    NMAP
+}
+
+
+#SNORT FUNCTIONS
 
 function SNORT () {
     clear
@@ -322,7 +519,7 @@ function SNORT_INSTALAR () {
     else
         echo invalid option, try again
         sleep 1
-        SQUID_INSTALAR 
+        SQUID_INSTALAR
     fi 
 
 }
