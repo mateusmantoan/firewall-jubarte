@@ -4,9 +4,11 @@ MAINTAINER @mateusmantoan
 
 LABEL Description="squid IDS"
 
-RUN apk add -u snort
+RUN apk add -u snort && rm -f /var/cache/apk/*
 
-VOLUME /root/logs/snort/
+VOLUME /etc/
+
+VOLUME /var/log/
 
 EXPOSE 80
 
