@@ -6,9 +6,8 @@ LABEL Description="snort IDS"
 
 RUN apk add -u snort && rm -f /var/cache/apk/*
 
-VOLUME /etc/
-
-VOLUME /var/log/
+VOLUME /etc/jubarte/
 
 EXPOSE 80
+
 

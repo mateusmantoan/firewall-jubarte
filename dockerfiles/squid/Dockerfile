@@ -2,11 +2,11 @@ FROM alpine:latest
 
 MAINTAINER @mateusmantoan
 
-RUN apk add -u squid
+RUN apk add -u squid && rm -f /var/cache/apk/*
 
 LABEL Description="squid proxy"
 
-VOLUME /root/logs/squid/
+VOLUME /etc/jubarte/
 
 EXPOSE 80
 

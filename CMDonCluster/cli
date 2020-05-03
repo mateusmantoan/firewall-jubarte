@@ -1,9 +1,9 @@
 #!/bin/bash
 
-IMAGESNORT="mateusmantoan/snort:1.0"
-IMAGESQUID="mateusmantoan/squid:1.0"
-IMAGETCPDUMP="mateusmantoan/tcpdump:1.0"
-IMAGENMAP="mateusmantoan/nmap:1.0"
+IMAGESNORT="mateusmantoan/snort"
+IMAGESQUID="mateusmantoan/squid"
+IMAGETCPDUMP="mateusmantoan/tcpdump"
+IMAGENMAP="mateusmantoan/nmap"
 DEFAULTPASS="toor"
 INT0="wlp3s0"
 INT1="eth1"
@@ -145,7 +145,7 @@ function HOSTS_REMOVER () {
 }
 
 
-function WAAAAAAAIT () {
+function WAAAAIT () {
     for counter in {1..5}; do echo .; sleep 0.5; done
 }
 
@@ -469,7 +469,7 @@ function SNORT_INSTALAR () {
         INICIO    
     else
         echo invalid option, try again
-        sleep 1
+        WAAAAIT
         SNORT_INSTALAR
     fi
 }
@@ -505,7 +505,7 @@ function SQUID () {
     fi
 }
 
-function SNORT_INSTALAR () {
+function SQUID_INSTALAR () {
     echo Type 1 to install the squid on cluster
     echo Type 0 to back
     read option
