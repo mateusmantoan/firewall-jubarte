@@ -5,6 +5,7 @@ IMAGESQUID="mateusmantoan/squid"
 IMAGETCPDUMP="mateusmantoan/tcpdump"
 IMAGENMAP="mateusmantoan/nmap"
 DEFAULTPASS="toor"
+FOLDER="/etc/jubarte"
 INT0="wlp3s0"
 INT1="eth1"
 
@@ -430,22 +431,23 @@ function SNORT () {
     echo \#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#
     if [ `cat /etc/jubarte/snort-status` != 1 ]
     then
-    SNORT_INSTALAR    
+    SNORT_START    
     fi
-    echo Type 1 to 
-    echo Type 2 to 
-    echo Type 3 to 
+    echo the log files are on /etc/jubarte/snort/log/
+    echo Type 1 to see the status of snort
+    echo Type 2 to see the alert file online
+    echo Type 3 to stop snort
     echo Type 0 to back
     read option
     if [ $option = 1 ]
     then
-        SNORT_
+        SNORT_STATUS
     elif [ $option = 2 ]
     then
-        SNORT_
+        SNORT_ALERT_FILE
     elif [ $option = 3 ]
     then
-        SNORT_
+        SNORT_STOP
     elif [ $option = 0 ]
     then
         INICIO    
@@ -456,13 +458,14 @@ function SNORT () {
     fi
 }
 
-function SNORT_INSTALAR () {
-    echo Type 1 to install snort on cluster
+function SNORT_START () {
+    echo The config files must be on /etc/jubarte/snort/
+    echo Type 1 to start snort on cluster
     echo Type 0 to back
     read option
     if [ $option = 1 ]
     then
-        docker service create -td --network host --mode global --name snort $IMAGESNORT
+        docker service create -td --network host --mode global --name snort $IMAGESNORT 
         echo "1" > /etc/jubarte/snort-status
     elif [ $option = 0 ]
     then
@@ -473,6 +476,13 @@ function SNORT_INSTALAR () {
         SNORT_INSTALAR
     fi
 }
+
+
+
+
+#SQUID FUNCTIONS
+
+
 function SQUID () {
     clear
     echo SQUID
