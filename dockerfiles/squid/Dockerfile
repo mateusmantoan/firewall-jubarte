@@ -10,4 +10,3 @@ VOLUME /etc/jubarte/
 
 EXPOSE 80
 
-CMD squid
