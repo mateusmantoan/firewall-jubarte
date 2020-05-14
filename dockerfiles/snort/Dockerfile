@@ -6,8 +6,6 @@ LABEL Description="snort IDS"
 
 RUN apk add -u snort && rm -f /var/cache/apk/*
 
-VOLUME /etc/jubarte/
-
-EXPOSE 80
+ENTRYPOINT squid -NYCd 1
 
 
