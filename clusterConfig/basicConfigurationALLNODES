@@ -1,30 +1,42 @@
-#basic instalation for all nodes of cluster
+# basic instalation for all nodes of cluster
 
-#script off official docker site
+# script off official docker site
 DOCKER_SCRIPT=https://get.docker.com
 
-#install packets
+# the architeture of machines used for nodes
+#ARCH=amd64
+ARCH=arm64
+
+# release of debian
+RELEASE=buster
+
+# install packets
 apt-get update && apt-get install -y curl \
 apt-transport-https \
 iproute2 \
 iptables-persistent \
-sshpass
+sshpass \
+wget \
+gnupg
+
+# Install the public key for gluster repo
+wget -O - https://download.gluster.org/pub/gluster/glusterfs/7/rsa.pub | apt-key add -
+
+# Add gluster repository on sources list
+echo deb [arch=${ARCH}] https://download.gluster.org/pub/gluster/glusterfs/7/LATEST/Debian/${RELEASE}/${ARCH}/apt ${RELEASE} main > /etc/apt/sources.list.d/gluster.list 
+
+# Update repositories and Install the gluster
+apt update && apt install glusterfs-server -y
+
+# install docker
 curl -fsSL $DOCKER_SCRIPT | bash
+
+# clean the apt cache
 apt clean
 
 #configure ssh for remote access
 echo "PermitRootLogin yes" >> /etc/ssh/sshd_config
 systemctl restart ssh
 
-#create manager files
-touch /etc/jubarte/hostsfile
-touch /etc/jubarte/iptables-actual
-touch /etc/jubarte/iptables-actual_TEMP
-echo "0" > /etc/jubarte/snort-status
-echo "0" > /etc/jubarte/squid-status
-mkdir /etc/jubarte/logs/
-mkdir /etc/jubarte/logs/tcpdump
-mkdir /etc/jubarte/logs/nmap
-mkdir /etc/jubarte/logs/snort
-iptables-save >> /etc/jubarte/iptables-clean
+
 
